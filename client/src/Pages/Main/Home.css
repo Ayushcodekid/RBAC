@@ -1,0 +1,122 @@
+.project-item {
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.project-item:hover {
+  background-color: #f0f0f0;
+}
+
+.project-item.selected {
+  background-color: #007bff; /* Highlight color for the selected project */
+  color: white;
+  border: 1px solid #0056b3; /* Optionally change border color for selected item */
+}
+
+
+
+.projects-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 40%;
+  }
+  
+  .projects-header {
+    display: flex;
+    /* justify-content: space-between; */
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 4vh;
+
+  }
+  
+  .add-project-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .add-project-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .projects-form-container {
+    margin-bottom: 20px;
+  }
+  
+  .project-form {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+
+  }
+  
+  .project-form input,
+  .project-form textarea {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+  
+  .form-buttons {
+    display: flex;
+    gap: 2vh;
+  }
+  
+  .form-buttons button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .form-buttons button:hover {
+    background-color: #0056b3;
+  }
+  
+  .project-list-container {
+    margin-top: 20px;
+  }
+  
+  .project-item {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    cursor: pointer;
+
+  }
+  
+  .project-item h3 {
+    margin: 0;
+  }
+  
+  .project-item p {
+    margin: 5px 0 0;
+  }
+
+  .doc-icon {
+    width: 5rem;
+    height: 7vh;
+    margin-left: 50%;
+    position: absolute;
+    cursor: pointer;
+}
+  
+
