@@ -113,27 +113,42 @@
 
 
 
-
 import React, { useState, useEffect } from 'react';
 import './document.css';
 import api from '../../api';
 
 const Document = () => {
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState([]); // Files selected for upload
+  const [uploadedFiles, setUploadedFiles] = useState([]); // Files fetched from the backend
   const [selectedProject, setSelectedProject] = useState(null);
-
 
   useEffect(() => {
     const storedProjectId = localStorage.getItem('selectedProject');
     if (storedProjectId) {
       setSelectedProject(storedProjectId);
+      fetchProjectFiles(storedProjectId);
     } else {
       alert("No project selected");
     }
   }, []);
 
+  const fetchProjectFiles = async (projectId) => {
+    try {
+      const token = localStorage.getItem('token');
+      console.log("Fetching files for projectId:", projectId);
+      const response = await api.get(`/projects/${projectId}/files`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
-
+      console.log("Response received:", response.data);
+      setUploadedFiles(response.data.files); // Assuming response.data.files is an array of file names or paths
+    } catch (error) {
+      console.error('Error fetching project files:', error);
+      alert("Error fetching project files");
+    }
+  };
 
   const handleFileChange = (event) => {
     const selectedFiles = Array.from(event.target.files);
@@ -163,11 +178,11 @@ const Document = () => {
         }
       });
       console.log('Files uploaded successfully:', response.data);
-      setFiles(response.data.files);
-      alert("Files uploaded successfully")
+      fetchProjectFiles(selectedProject);
+      alert("Files uploaded successfully");
     } catch (error) {
       console.error('Error uploading files:', error);
-      alert("Error uploading files")
+      alert("Error uploading files");
     }
   };
 
@@ -184,18 +199,17 @@ const Document = () => {
         <button onClick={handleFileUpload} className="upload-button">
           Upload Files
         </button>
-        {files && files.length > 0 && (
+        {uploadedFiles && uploadedFiles.length > 0 && (
           <div className="file-box">
             <h3>Uploaded Files:</h3>
-            <ul>
-              {files.map((file, index) => (
-                <li key={index}>{file.name}</li>
+            <ul className='files-list'>
+              {uploadedFiles.map((fileName, index) => (
+                <li className='file-li' key={index}>{fileName}</li>
               ))}
             </ul>
           </div>
         )}
-
-
+       
       </div>
     </div>
   );

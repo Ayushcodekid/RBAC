@@ -65,6 +65,15 @@
 
 
 
+
+
+
+
+
+
+
+
+
 const mongoose = require('mongoose');
 
 const Project = require("../models/project");
@@ -74,7 +83,6 @@ const jwt = require('jsonwebtoken');
 require("dotenv").config();
 
 const User = require("../models/user"); // Assuming you have a User model
-const { log } = require('console');
 
 
 const secretKey = process.env.JWT_SECRET;
@@ -231,11 +239,11 @@ async function uploadFiles(req, res) {
         project.files.push(...filePaths);
         await project.save();
 
-        const updatedproject= await Project.findById(projectId)
-        const updatedFiles = updatedproject.files
-        console.log("Files uplaoded: ", updatedFiles);
+        // const updatedproject= await Project.findById(projectId)
+        // const updatedFiles = updatedproject.files
+        // console.log("Files uplaoded: ", updatedFiles);
 
-        res.status(200).send({ message: "Files uploaded successfully", file: updatedFiles });
+        res.status(200).send({ message: "Files uploaded successfully", project });
     } catch (err) {
         console.error('Error uploading files:', err);
         res.status(500).send({ message: "Error uploading files" });
@@ -245,6 +253,31 @@ async function uploadFiles(req, res) {
 
 
 
+async function getProjectFiles(req, res) {
+    try {
+
+        console.log('Request Params:', req.params.projectId);
+        const projectId = req.params.projectId;
+
+        console.log('Project ID:', projectId);
+
+        if (!mongoose.Types.ObjectId.isValid(projectId)) {
+            return res.status(400).send({ message: "Inavlid Project Id" })
+        }
+
+        const project = await Project.findById(projectId)
+
+        if (!project) {
+            return res.status(404).send({ message: "Project not found" })
+        }
+        console.log('Files found:', project.files);
+        res.status(200).send({ files: project.files })
+    }
+    catch (err) {
+        console.error('Error fetching project files:', err);
+        res.status(500).send({ message: 'Error fetching project files' });
+    }
+}
 
 
 
@@ -353,6 +386,7 @@ const ProjectController = {
     getProjects,
     uploadFiles,
     addUserToProject,
+    getProjectFiles
 };
 
 module.exports = ProjectController;

@@ -46,17 +46,7 @@
     margin-top: 0;
   }
   
-  .file-box ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .file-box li {
-    padding: 5px 0;
-  }
-
-  .file-list{
-    color: black;
-  }
+.file-li{
+  color: black;
+}
   
