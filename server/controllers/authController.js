@@ -52,7 +52,7 @@ async function loginUser(req, res){
 
         // let token = await jwt.sign({userId: user?._id}, secretKey, {expiresIn: "1h"});
 
-        let token = await jwt.sign({ userId: user?._id, username: user?.username }, secretKey, { expiresIn: "1h" });
+        let token = await jwt.sign({ userId: user?._id, username: user?.username,  role: user.role }, secretKey, { expiresIn: "1h" });
 
             let finalData={
                 userId: user?._id,

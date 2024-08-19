@@ -28,6 +28,8 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
 const ProjectController = require('../controllers/projectController');
+
+
 const router = express.Router();
 
 // Route for creating a new project
@@ -37,7 +39,7 @@ router.post('/projects', ProjectController.createProject);
 router.get('/projects', ProjectController.getProjects);
 
 // Route for uploading files to a project
-router.post('/upload', upload.array('files'), ProjectController.uploadFiles);
+router.post('/upload',  upload.array('files'), ProjectController.uploadFiles);
 
 // Route for adding a user to a project
 router.post('/projects/:projectId/users', ProjectController.addUserToProject);

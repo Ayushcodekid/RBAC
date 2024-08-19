@@ -268,6 +268,7 @@ const Project = () => {
 
   const handleUserSubmit = async (e) => {
     e.preventDefault();
+    setShowAddUser(false)
     if (selectedProjectId) {
       try {
         const response = await api.post(`/projects/${selectedProjectId}/users`, {
@@ -290,6 +291,8 @@ const Project = () => {
     setSelectedProjectId(projectId);
     console.log("selected project: ", projectId);
     localStorage.setItem('selectedProject', projectId)
+
+    
   };
   
 

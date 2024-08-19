@@ -82,7 +82,7 @@ const fs = require('fs');
 const jwt = require('jsonwebtoken');
 require("dotenv").config();
 
-const User = require("../models/user"); // Assuming you have a User model
+const User = require("../models/user");
 
 
 const secretKey = process.env.JWT_SECRET;
@@ -203,21 +203,26 @@ async function getProjects(req, res) {
 
 
 
-
-async function uploadFiles(req, res) {
+const uploadFiles = async (req, res) => {
     try {
         const { projectId } = req.body;
         const files = req.files;
 
-        console.log('Received projectId:', projectId); // Debugging log
-        console.log('Received files:', files);
 
+        const authorizationHeader = req.headers.authorization;
+        if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
+            return res.status(401).send({ message: "Unauthorized" });
+        }
+
+        const token = authorizationHeader.split(' ')[1];
+        const decoded = jwt.verify(token, secretKey);
+        const uploaderId = decoded.userId;
+        // const uploaderUsername = decoded.username;
 
         if (!projectId || projectId === 'undefined') {
             return res.status(400).send({ message: "Project ID is required" });
         }
 
-        // Validate projectId as an ObjectId
         if (!mongoose.Types.ObjectId.isValid(projectId)) {
             return res.status(400).send({ message: "Invalid Project ID" });
         }
@@ -227,57 +232,112 @@ async function uploadFiles(req, res) {
             return res.status(404).send({ message: "Project not found" });
         }
 
-        const filePaths = [];
-        files.forEach(file => {
-            const sourcePath = path.join('uploads', file.filename);
-            const destinationPath = path.join('uploads', file.filename); // Use the same directory if not moving
-            fs.renameSync(sourcePath, destinationPath);  // Move file to the desired folder
-            filePaths.push(destinationPath);
+        const fileEntries = files.map(file => {
+            const destinationPath = path.join('uploads', file.originalname);
+            fs.renameSync(path.join('uploads', file.filename), destinationPath);  // Rename file
 
+
+            return {
+                path: destinationPath, // Store the path as a string
+                uploaderId,
+            };
         });
 
-        project.files.push(...filePaths);
-        await project.save();
+        console.log('File Entries before saving:', fileEntries);
 
-        // const updatedproject= await Project.findById(projectId)
-        // const updatedFiles = updatedproject.files
-        // console.log("Files uplaoded: ", updatedFiles);
+
+        project.files.push(...fileEntries);
+        await project.save();
 
         res.status(200).send({ message: "Files uploaded successfully", project });
     } catch (err) {
         console.error('Error uploading files:', err);
         res.status(500).send({ message: "Error uploading files" });
     }
-}
+};
+
+
+
 
 
 
 
 async function getProjectFiles(req, res) {
     try {
-
-        console.log('Request Params:', req.params.projectId);
         const projectId = req.params.projectId;
+        const authorizationHeader = req.headers.authorization;
 
-        console.log('Project ID:', projectId);
-
-        if (!mongoose.Types.ObjectId.isValid(projectId)) {
-            return res.status(400).send({ message: "Inavlid Project Id" })
+        // Check for authorization header
+        if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
+            return res.status(401).send({ message: "Unauthorized" });
         }
 
-        const project = await Project.findById(projectId)
+        // Extract and verify the token
+        const token = authorizationHeader.split(' ')[1];
+        const decoded = jwt.verify(token, secretKey);
+        const userId = decoded.userId;
+        const username = decoded.username;
+
+        // Validate projectId
+        if (!mongoose.Types.ObjectId.isValid(projectId)) {
+            return res.status(400).send({ message: "Invalid Project ID" });
+        }
+
+        // Fetch project details
+        const project = await Project.findById(projectId);
 
         if (!project) {
-            return res.status(404).send({ message: "Project not found" })
+            return res.status(404).send({ message: "Project not found" });
         }
-        console.log('Files found:', project.files);
-        res.status(200).send({ files: project.files })
-    }
-    catch (err) {
+
+        // Check if the user is the project owner
+        const isOwner = project.userId.toString() === userId.toString();
+        // Find the user in the project's users list
+        const userInProject = project.users.find(user => user.username === username);
+        const role = userInProject ? userInProject.role : null;
+
+        if (!userInProject && !isOwner) {
+            return res.status(403).send({ message: "You don't have access to this project" });
+        }
+
+        let accessibleFiles = [];
+
+
+        // Determine accessible files based on role
+        if (isOwner) {
+            accessibleFiles = project.files;
+        }
+
+
+        // Role is architect, filtering files uploaded by user
+        else if (role === 'architect') {
+            accessibleFiles = project.files.filter(file => file.uploaderId && file.uploaderId.toString() === userId.toString());
+        }
+
+
+        // Role is plumber, no files accessible
+        else if (role === 'plumber') {
+            accessibleFiles = [];
+
+        }
+
+        // Role is constructor, filtering files not uploaded by project owner
+        else if (role === 'constructor') {
+            accessibleFiles = project.files.filter(file => file.uploaderId && file.uploaderId.toString() !== project.userId.toString());
+        }
+
+        else {
+            return res.status(403).send({ message: "Role not recognized" });
+        }
+
+        console.log('Accessible Files:', accessibleFiles);
+        res.status(200).send({ files: accessibleFiles });
+    } catch (err) {
         console.error('Error fetching project files:', err);
         res.status(500).send({ message: 'Error fetching project files' });
     }
 }
+
 
 
 
