@@ -191,39 +191,45 @@ const Project = () => {
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [userData, setUserData] = useState({ username: '', role: '' });
 
+
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchProjects();
+
   }, []);
-  
+
+
+
+
+
 
 
 
   const fetchProjects = async () => {
     const token = localStorage.getItem('token');
     if (token) {
-        try {
-            const response = await api.get('/projects', { headers: { Authorization: `Bearer ${token}` } });
-            console.log('Projects fetched successfully:', response.data); // Add this log
-            setProjects(response.data);
-        } catch (err) {
-            console.error('Error fetching projects:', err);
-            if (err.response && err.response.status === 401) {
-                alert('Session expired. Please log in again.');
-                localStorage.removeItem('token');
-                navigate('/');
-            } else {
-                // alert('Error fetching projects. Please try again later.');
-            }
+      try {
+        const response = await api.get('/projects', { headers: { Authorization: `Bearer ${token}` } });
+        console.log('Projects fetched successfully:', response.data); // Add this log
+        setProjects(response.data);
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        if (err.response && err.response.status === 401) {
+          alert('Session expired. Please log in again.');
+          localStorage.removeItem('token');
+          navigate('/');
+        } else {
+          // alert('Error fetching projects. Please try again later.');
         }
+      }
     } else {
-        alert('You must be logged in to view projects.');
+      alert('You must be logged in to view projects.');
     }
-};
+  };
 
 
-  
+
 
   const handleAddClick = () => {
     setShowAddProject(true);
@@ -292,9 +298,11 @@ const Project = () => {
     console.log("selected project: ", projectId);
     localStorage.setItem('selectedProject', projectId)
 
-    
+
   };
+
   
+
 
   return (
     <div className='main'>
@@ -306,9 +314,14 @@ const Project = () => {
           <button className="add-project-button" onClick={handleAddClick}>
             Add Project
           </button>
-          <button className="add-user-button" onClick={handleUserAddClick}>
-            Add User to Project
-          </button>
+
+            <button className="add-user-button" onClick={handleUserAddClick}>
+              Add User to Project
+            </button>
+          
+
+
+
         </div>
         {showAddProject && (
           <div className="projects-form-container">
@@ -353,8 +366,8 @@ const Project = () => {
               >
                 <option value="" disabled>Select Role</option>
                 <option value="architect">Architect</option>
-                <option value="constructor">Constructor</option>
-                <option value="plumber">Plumber</option>
+                <option value="civil">Civil Engineer</option>
+                <option value="structural">Structural Engineer</option>
               </select>
               <div className="form-buttons">
                 <button type="submit">Add User</button>

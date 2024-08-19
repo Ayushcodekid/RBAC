@@ -47,7 +47,7 @@ const projectSchema = new mongoose.Schema({
     users: [{
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Ensure this field is populated correctly
         username: { type: String, required: true },
-        role: { type: String, enum: ['architect', 'constructor', 'plumber'], required: true }
+        role: { type: String, enum: ['architect', 'civil', 'structural'], required: true }
     }]
 });
 

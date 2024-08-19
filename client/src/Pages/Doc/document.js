@@ -121,6 +121,9 @@ const Document = () => {
   const [files, setFiles] = useState([]); // Files selected for upload
   const [uploadedFiles, setUploadedFiles] = useState([]); // Files fetched from the backend
   const [selectedProject, setSelectedProject] = useState(null);
+  const [userRole, setUserRole] = useState(''); // State to store the user's role
+
+
   
 
   useEffect(() => {
@@ -128,12 +131,35 @@ const Document = () => {
     if (storedProjectId) {
       setSelectedProject(storedProjectId);
       fetchProjectFiles(storedProjectId);
+      fetchUserRole(storedProjectId)
     } else {
       alert("No project selected");
     }
   }, []);
 
+
+
+
+    // Fetch the user's role from the backend
+    const fetchUserRole = async (projectId) => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await api.get(`/projects/${projectId}/role`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
   
+        const { role } = response.data;
+        setUserRole(role); // Set the user's role
+      } catch (error) {
+        console.error('Error fetching user role:', error);
+      }
+    };
+
+    
+  
+
   const fetchProjectFiles = async (projectId) => {
     try {
         const token = localStorage.getItem('token');
@@ -194,15 +220,19 @@ const Document = () => {
     <div className="folder-box-container">
       <h2>Upload Files</h2>
       <div className="folder-box">
-        <input
-          type="file"
-          multiple
-          onChange={handleFileChange}
-          className="file-input"
-        />
-        <button onClick={handleFileUpload} className="upload-button">
-          Upload Files
-        </button>
+      {userRole !== 'civil' && ( // Conditionally render the upload button for non-civil engineers
+          <>
+            <input
+              type="file"
+              multiple
+              onChange={handleFileChange}
+              className="file-input"
+            />
+            <button onClick={handleFileUpload} className="upload-button">
+              Upload Files
+            </button>
+          </>
+        )}
         {uploadedFiles && uploadedFiles.length > 0 && (
           <div className="file-box">
             <h3>Uploaded Files:</h3>

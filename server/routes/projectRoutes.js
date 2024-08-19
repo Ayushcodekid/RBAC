@@ -47,6 +47,7 @@ router.post('/projects/:projectId/users', ProjectController.addUserToProject);
 
 router.get('/projects/:projectId/files', ProjectController.getProjectFiles);
 
+router.get('/projects/:projectId/role', ProjectController.getUserRoleForProject);
 
 // Optionally, add routes for updating user roles or other RBAC-related functionality
 // router.put('/projects/:projectId/users/:username', ProjectController.updateUserRole);

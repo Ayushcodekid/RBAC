@@ -217,6 +217,7 @@ const uploadFiles = async (req, res) => {
         const token = authorizationHeader.split(' ')[1];
         const decoded = jwt.verify(token, secretKey);
         const uploaderId = decoded.userId;
+
         // const uploaderUsername = decoded.username;
 
         if (!projectId || projectId === 'undefined') {
@@ -231,6 +232,8 @@ const uploadFiles = async (req, res) => {
         if (!project) {
             return res.status(404).send({ message: "Project not found" });
         }
+
+        
 
         const fileEntries = files.map(file => {
             const destinationPath = path.join('uploads', file.originalname);
@@ -316,13 +319,13 @@ async function getProjectFiles(req, res) {
 
 
         // Role is plumber, no files accessible
-        else if (role === 'plumber') {
-            accessibleFiles = [];
+        else if (role === 'civil') {
+            accessibleFiles = project.files;
 
         }
 
         // Role is constructor, filtering files not uploaded by project owner
-        else if (role === 'constructor') {
+        else if (role === 'structural') {
             accessibleFiles = project.files.filter(file => file.uploaderId && file.uploaderId.toString() !== project.userId.toString());
         }
 
@@ -337,56 +340,6 @@ async function getProjectFiles(req, res) {
         res.status(500).send({ message: 'Error fetching project files' });
     }
 }
-
-
-
-
-
-
-
-// async function uploadFiles(req, res) {
-//     try {
-//         const { projectId } = req.body;
-//         const files = req.files;
-//         const token = req.headers.authorization.split(' ')[1];
-//         const decoded = jwt.verify(token, secretKey);
-//         const userId = decoded.userId;
-
-//         if (!projectId || projectId === 'undefined') {
-//             return res.status(400).send({ message: "Project ID is required" });
-//         }
-
-//         if (!mongoose.Types.ObjectId.isValid(projectId)) {
-//             return res.status(400).send({ message: "Invalid Project ID" });
-//         }
-
-//         // Check if user has permission to upload files
-//         const hasPermission = await checkPermission(userId, projectId, 'editor');
-//         if (!hasPermission) {
-//             return res.status(403).send({ message: "Forbidden: Insufficient permissions" });
-//         }
-
-//         const project = await Project.findById(projectId);
-//         if (!project) {
-//             return res.status(404).send({ message: "Project not found" });
-//         }
-
-//         const filePaths = [];
-//         files.forEach(file => {
-//             const sourcePath = path.join('uploads', file.filename);
-//             const destinationPath = path.join('uploads', file.filename);
-//             fs.renameSync(sourcePath, destinationPath);
-//             filePaths.push(destinationPath);
-//         });
-
-//         project.files.push(...filePaths);
-//         await project.save();
-//         res.status(200).send({ message: "Files uploaded successfully", project });
-//     } catch (err) {
-//         console.error('Error uploading files:', err);
-//         res.status(500).send({ message: "Error uploading files" });
-//     }
-// }
 
 
 
@@ -418,8 +371,11 @@ const addUserToProject = async (req, res) => {
             return res.status(404).send({ message: 'Project not found' });
         }
 
+
+        
+
         // Validate the role
-        if (!['architect', 'constructor', 'plumber'].includes(role)) {
+        if (!['architect', 'civil', 'structural'].includes(role)) {
             return res.status(400).send({ message: 'Invalid role' });
         }
 
@@ -440,13 +396,49 @@ const addUserToProject = async (req, res) => {
 
 
 
+const getUserRoleForProject = async (req, res) => {
+    try {
+      const projectId = req.params.projectId;
+      const authorizationHeader = req.headers.authorization;
+  
+      if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
+        return res.status(401).send({ message: "Unauthorized" });
+      }
+  
+      const token = authorizationHeader.split(' ')[1];
+      const decoded = jwt.verify(token, secretKey);
+      const username = decoded.username;
+  
+      const project = await Project.findById(projectId);
+      if (!project) {
+        return res.status(404).send({ message: "Project not found" });
+      }
+  
+      const userInProject = project.users.find(user => user.username === username);
+
+      if (!userInProject) {
+        return res.status(404).send({ message: "User not found in project" });
+      }
+  
+      res.status(200).send({ role: userInProject.role });
+    } catch (err) {
+      console.error('Error fetching user role for project:', err);
+      res.status(500).send({ message: 'Internal Server Error' });
+    }
+  };
+
+
+
+
 
 const ProjectController = {
     createProject,
     getProjects,
     uploadFiles,
     addUserToProject,
-    getProjectFiles
+    getProjectFiles,
+    getUserRoleForProject
+
 };
 
 module.exports = ProjectController;
