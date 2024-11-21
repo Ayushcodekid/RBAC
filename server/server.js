@@ -87,7 +87,7 @@ io.on('connection', (socket) => {
 
   socket.on('sendMessage', (data) => {
     console.log('Message received:', data);
-    io.to(data.projectId).emit('receiveMessage', data); // Emit message to users in the same project
+    io.to(data.projectId).emit('receiveMessage', data); 
   });
 
   socket.on('disconnect', () => {
