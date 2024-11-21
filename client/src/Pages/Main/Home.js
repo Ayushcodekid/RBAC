@@ -181,6 +181,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../api';
 import { IoIosDocument } from 'react-icons/io';
+import Chat from "../Chat/Chat";
 
 
 const Project = () => {
@@ -190,8 +191,7 @@ const Project = () => {
   const [showAddUser, setShowAddUser] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [userData, setUserData] = useState({ username: '', role: '' });
-
-
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -395,6 +395,7 @@ const Project = () => {
           </ul>
         </div>
       </div>
+      <Chat/>
     </div>
   );
 };

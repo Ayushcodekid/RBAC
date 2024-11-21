@@ -35,6 +35,9 @@ const handleSubmit = async(e) =>{
         const response= await api.post('/login', formData);
         console.log("API Response:", response); // Log API response for debugging
 
+        const userId = localStorage.setItem('userId', response.data.userId);
+        const username = localStorage.setItem('username', response.data.username);
+
         login(response.data.token)
         // alert(response.data.message || "Login successfull")
         navigate('/projects'); 
