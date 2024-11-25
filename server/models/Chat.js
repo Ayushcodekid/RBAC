@@ -12,6 +12,10 @@ const chatSchema = new mongoose.Schema({
     ref: 'users',
     required: true
   },
+senderName: {
+    type: String,
+    required: true
+  },
   message: {
     type: String,
     required: true
